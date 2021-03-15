@@ -5,6 +5,16 @@
 #ifndef HEXTRIE_DYNAMIC_HEX_TRIE_HPP
 #define HEXTRIE_DYNAMIC_HEX_TRIE_HPP
 #define BIT_SHIFT 4
+#define WALK_TRIE(currentNode, key) \
+\
+K hex_index, end = 1;\
+while(key * end > 0)\
+{\
+hex_index = key & 0xF; \
+currentNode = &currentNode->m_branch->m_children[hex_index]; \
+end = currentNode->m_branch != nullptr; \
+key >>= BIT_SHIFT;\
+}
 #include "typedef.hpp"
 namespace botched
 {
@@ -15,11 +25,6 @@ namespace botched
         struct branch;
         node m_root;
         u64 m_size;
-        template<typename T>
-        static T* mult_ptr(T* ptr, u64 val)
-        {
-            return reinterpret_cast<T*>(reinterpret_cast<u64>(ptr)*val);
-        }
         struct branch
         {
             node m_children[16];
@@ -40,19 +45,9 @@ namespace botched
         };
         // Lets just say that branchless implementation is 8 times faster than the branching one, at 10'000 iterations
         // since the branchless implementation didn't find anything, we need to test again
-        node* walk_trie(K& key)
-        {
-            node* currentNode = &m_root;
-            K hex_index, end = 1;
-            while(key * end > 0)
-            {
-                hex_index = key & 0xF;
-                currentNode = &currentNode->m_branch->m_children[hex_index];
-                end = currentNode->m_branch != nullptr;
-                key >>= BIT_SHIFT;
-            }
-            return currentNode;
-        }
+        // macro makes the contain 1 time faster and find 1.5 times faster. Macro is in
+        // that is only with clang though. Macro is acutally slower with GCC for some reason
+
 
         V* create_node_path(K key)
         {
@@ -75,13 +70,16 @@ namespace botched
         dynamic_hex_trie(): m_size(0){}
         V* find(K key)
         {
-            auto final_node = walk_trie(key)->m_value;
-            return mult_ptr(final_node, key == 0);
+            node* currentNode = &m_root;
+            WALK_TRIE(currentNode, key)
+            return reinterpret_cast<V*>(reinterpret_cast<u64>(currentNode)*(key == 0));
         }
 
         bool contains(K key)
         {
-            return reinterpret_cast<u64>(walk_trie(key)->m_value)*(key == 0);
+            node* currentNode = &m_root;
+            WALK_TRIE(currentNode, key)
+            return reinterpret_cast<u64>(currentNode->m_value)*(key == 0);
         }
 
         V& insert(K key, V value)
