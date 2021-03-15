@@ -1,17 +1,18 @@
-cmake_minimum_required(VERSION 3.1)
-project(HexaTrie VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
+project(hex_trie VERSION 1.0.0 LANGUAGES CXX)
 
-option(HEXA_TRIE_TEST "Generate the test target." OFF)
-
-if(HEXA_TRIE_TEST)
-	enable_testing()
-	add_subdirectory(test)
-endif()
+option(HEX_TRIE_TEST "Generate the test target." ON)
 
 
-add_library(hexa_trie INTERFACE)
-add_library(botched135::hexa_trie ALIAS hexa_trie)
+add_library(${PROJECT_NAME}  INTERFACE)
+add_library(botched135::hex_trie ALIAS ${PROJECT_NAME} )
 
-target_include_directories(hexa_trie INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_include_directories(${PROJECT_NAME} INTERFACE
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  	$<INSTALL_INTERFACE:include/)
+
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+
+enable_testing()
+add_subdirectory(test)
+
