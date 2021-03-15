@@ -6,6 +6,7 @@
 template<size_t size>
 struct bytes
 {
+    static constexpr size_t m_size = size;
     bytes()=default;
     explicit bytes(uint32_t init_val)
     {
@@ -55,12 +56,17 @@ TEST_SUITE("HexTrie Look-up")
     {
         hex_trie_fixture<uint32_t, T> fixture;
         size_t id_count = 10'000;
-        fixture.init_hex_trie(id_count,0,1,256);
+        auto mod_value = 256;
+        fixture.init_hex_trie(id_count,0,1,mod_value);
 
         for(auto& x: fixture.data)
         {
             auto current_item = fixture.hex_trie.find(x);
             REQUIRE(current_item != nullptr);
+            for (int i = 0; i < T::m_size ; ++i)
+            {
+                CHECK(current_item->data[i] == ((x%mod_value)+i));
+            }
         }
     }
 
@@ -69,7 +75,6 @@ TEST_SUITE("HexTrie Look-up")
         hex_trie_fixture<uint32_t, T> fixture;
         size_t id_count = 10'000;
         fixture.init_hex_trie(id_count,0,1,256);
-
 
         for(auto& x: fixture.non_data)
             CHECK(fixture.hex_trie.find(x) == nullptr);
