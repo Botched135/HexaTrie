@@ -4,18 +4,19 @@
 
 #ifndef HEXTRIE_DYNAMIC_HEX_TRIE_HPP
 #define HEXTRIE_DYNAMIC_HEX_TRIE_HPP
-#define BIT_SHIFT 4
-#define WALK_TRIE(currentNode, key) \
-\
-K hex_index, end = 1;\
-while(key * end > 0)\
-{\
-hex_index = key & 0xF; \
-currentNode = &currentNode->m_branch->m_children[hex_index]; \
-end = currentNode->m_branch != nullptr; \
-key >>= BIT_SHIFT;\
-}
 #include "typedef.hpp"
+
+#define BIT_SHIFT 4
+#define WALK_TRIE(currentNode, key)                                 \
+K hex_index, end = 1;                                               \
+while(key * end > 0)                                                \
+{                                                                   \
+    hex_index = key & 0xF;                                          \
+    currentNode = &currentNode->m_branch->m_children[hex_index];    \
+    end = currentNode->m_branch != nullptr;                         \
+    key >>= BIT_SHIFT;                                              \
+}
+
 namespace botched
 {
     template<typename K, typename V>
